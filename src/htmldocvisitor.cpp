@@ -281,6 +281,7 @@ HtmlDocVisitor::HtmlDocVisitor(FTextStream &t,CodeOutputInterface &ci,
                                  m_hide(FALSE), m_ctx(ctx)
 {
   if (ctx) m_langExt=ctx->getDefFileExtension();
+  m_anchorHtml = Config_getString(HTML_HEADING_ANCHOR);
 }
 
   //--------------------------------------
@@ -1439,9 +1440,19 @@ void HtmlDocVisitor::visitPre(DocSection *s)
   if (m_hide) return;
   forceEndParagraph(s);
   m_t << "<h" << s->level() << getDirHtmlClassOfNode(getTextDirByConfig(s->title())) << ">";
-  m_t << "<a class=\"anchor\" id=\"" << s->anchor();
-  m_t << "\"></a>" << endl;
-  filter(convertCharEntitiesToUTF8(s->title().data()));
+  if( m_anchorHtml.length() )
+  {
+    m_t << "<span class=\"permalink\">";
+    m_t << "<a class=\"anchor\" id=\"" << s->anchor();
+    m_t << "\" href=\"#" << s->anchor();
+    m_t << "\">" << m_anchorHtml.data() << "</a></span>" << endl;
+  }
+  else
+  {
+    m_t << "<a class=\"anchor\" id=\"" << s->anchor();
+    m_t << "\"></a>" << endl;
+  }
+  m_t << convertCharEntitiesToUTF8(s->title().data()) << endl;
   m_t << "</h" << s->level() << ">\n";
 }
 
